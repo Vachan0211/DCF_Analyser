@@ -1,0 +1,21 @@
+# Virtual environment
+venv/
+
+# Environment variables (API keys)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Test data (10-K PDFs can be large)
+data/
+
+# Output files
+outputs/*.xlsx
+outputs/*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db
