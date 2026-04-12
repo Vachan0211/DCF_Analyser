@@ -68,8 +68,21 @@ def project_fcf(data: FinancialData, assumptions: DCFAssumptions) -> list:
 
 def calculate_dcf(data: FinancialData, assumptions: DCFAssumptions) -> dict:
     """
-    Full DCF: projects FCF, discounts to PV, adds terminal value,
-    computes enterprise value and intrinsic value per share.
+    Standard WACC-based DCF valuation.
+
+    Methodology:
+    - Free cash flows are discounted using after-tax WACC
+    - Tax benefit of debt is already embedded in the WACC calculation
+      via the after-tax cost of debt: Kd x (1 - tax rate)
+    - We do NOT separately add PV of tax shields (that would be APV)
+    - Mixing WACC-DCF and APV double-counts the tax shield — we avoid this
+
+    Formula:
+    FCF = NOPAT + D&A - Capex - Change in NWC
+    Terminal Value = FCF_n x (1 + g) / (WACC - g)  [Gordon Growth Model]
+    Enterprise Value = PV(FCFs) + PV(Terminal Value)
+    Equity Value = Enterprise Value - Net Debt
+    Intrinsic Value per Share = Equity Value / Shares Outstanding
     """
     wacc_results = calculate_wacc(data, assumptions)
     wacc = wacc_results["wacc"]
