@@ -110,17 +110,34 @@ def parse_financials_with_llm(extracted_text: str) -> FinancialData:
 
     try:
         raw_response = raw_response.strip()
-        if raw_response.startswith("```"):
-            raw_response = raw_response.split("```")[1]
-            if raw_response.startswith("json"):
-                raw_response = raw_response[4:]
+
+        # Strip markdown code fences if present
+        if "```" in raw_response:
+            parts = raw_response.split("```")
+            for part in parts:
+                part = part.strip()
+                if part.startswith("json"):
+                    part = part[4:].strip()
+                if part.startswith("{"):
+                    raw_response = part
+                    break
+
+        # Find the JSON object if there's extra text around it
+        start = raw_response.find("{")
+        end   = raw_response.rfind("}") + 1
+        if start != -1 and end > start:
+            raw_response = raw_response[start:end]
 
         data_dict = json.loads(raw_response)
 
     except json.JSONDecodeError as e:
         print(f"JSON parsing error: {e}")
-        print(f"Raw response:\n{raw_response}")
-        raise ValueError("Claude did not return valid JSON.")
+        print(f"Raw response preview:\n{raw_response[:500]}")
+        raise ValueError(
+            "Claude did not return valid JSON. "
+            "This can happen with very large PDFs — "
+            "try a PDF with fewer pages or check your API credits."
+        )
 
     financial_data = FinancialData(**data_dict)
     print("Data validated successfully.")

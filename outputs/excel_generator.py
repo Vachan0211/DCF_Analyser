@@ -257,7 +257,8 @@ def _sens_sheet(ws, results: dict):
         ws.row_dimensions[row].height = 17
 
         for ci, w in enumerate(w_list, 3):
-            val = table[str(round(g,2))][str(round(w,2))]
+            row_data = table.get(round(g,2), table.get(str(round(g,2)), {}))
+            val = row_data.get(round(w,2), row_data.get(str(round(w,2)), 0))
             if   val >= base * 1.10: bg = LIGHT_GREEN
             elif val <= base * 0.90: bg = RED_FILL
             else:                    bg = WHITE
